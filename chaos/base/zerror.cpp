@@ -8,6 +8,7 @@
 #include "zmap.h"
 
 #include <functional>
+#include <vector>
 
 #define FUCK_WINDOWS 1
 
@@ -797,12 +798,12 @@ bool registerSignalHandler(zerror_signal sigtype, signalHandler handler){
 
     sigmap[sig] = { sigtype, handler };
 
-    static uint8_t alternate_stack[SIGSTKSZ];
+    static std::vector<uint8_t> alternate_stack(static_cast<size_t>(SIGSTKSZ));
     stack_t ss;
      /* malloc is usually used here, I'm not 100% sure my static allocation
      is valid but it seems to work just fine. */
-    ss.ss_sp = (char*)alternate_stack;
-    ss.ss_size = SIGSTKSZ;
+    ss.ss_sp = alternate_stack.data();
+    ss.ss_size = alternate_stack.size();
     ss.ss_flags = 0;
 
     if(sigaltstack(&ss, NULL) != 0){
